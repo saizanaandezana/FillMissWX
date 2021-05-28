@@ -1,14 +1,16 @@
-\name{newFillMissWX}
-\alias{newFillMissWX}
+\name{FillMissWX}
+\alias{FillMissWX}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-A function to fill missing weather data with closest GHCN data based on inverse distance weighting method.
+A function to fill missing weather data.
 }
 \description{
-A function to fill missing weather data with closest GHCN data based on inverse distance weighting method.
+A function to fill missing weather data with closest GHCN data based on inverse distance weighting method. This function generates a dataframe which contains filled weather data 
+  including Precipitation (P (mm)), Maximum temperature (MaxTemp (c)), Minimum temperature (MinTemp (c)). Two diffrent filling methods can be selected by user which are inverse
+  distance weighting (method="IDW") or closeset GHCN weather data (method="closest").
 }
 \usage{
-NewFillMissWX(declat, declon, StnRadius, date_min, date_max)
+FillMissWX(declat, declon, StnRadius, date_min, date_max,method)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,6 +28,9 @@ A character string giving the earliest date of the daily weather time series tha
 }
   \item{date_max}{
 A character string giving the latest date of the daily weather time series that the user would like in the final output. This character string should be formatted as "yyyy-mm-dd". If not specified, the default is to keep all daily data for the queried weather site through the most current available date.
+}
+   \item{method}{
+A vector of character strings representing the method that has been used to fill weather data. The value should be any subset of the values c("IDW", "closest").
 }
 }
 \details{
@@ -64,10 +69,15 @@ Roja Kaveh Garna rojakaveh@vt.edu, Zachary M. Easton, Daniel R. Fuka
 \dontrun{
 flowgage_id="04282650" 
 flowgage=get_usgs_gage(flowgage_id,begin_date = "2010-01-01",
-    end_date = "2022-01-01")
-newLOCFer=NewFillMissWX(declat=flowgage$declat, declon=flowgage$declon,
-    StnRadius=30,date_min="2010-01-01",date_max="2021-01-01")
-View(newLOCFer)
+                       end_date = "2022-01-01")
+LOCFerIDW=NewFillMissWX(declat=flowgage$declat, declon=flowgage$declon,
+                   StnRadius=30,date_min="2010-01-01",date_max="2021-01-01",
+                    method = "IDW")
+LOCFerClosest=NewFillMissWX(declat=flowgage$declat, declon=flowgage$declon,
+                          StnRadius=30,date_min="2010-01-01",date_max="2021-01-01",
+                         method = "closest")
+View(LOCFerIDW)
+View(LOCFerClosest)
 
 }
 }
