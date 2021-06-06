@@ -1,6 +1,5 @@
 FillMissWX=function(declat, declon,StnRadius,date_min,date_max,method){
   if (method == "IDW"){
-
      stns=meteo_distance(
        station_data=ghcnd_stations(),
        lat=declat,
