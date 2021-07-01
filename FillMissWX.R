@@ -1,32 +1,43 @@
 FillMissWX=function(declat, declon,StnRadius,date_min,date_max,method,alfa=2){
-  if (method == "IDW"){
-    
-    stns=meteo_distance(
+  stns=meteo_distance(
       station_data=ghcnd_stations(),
       lat=declat,
       long=declon,
       units = "deg",
       radius = StnRadius,
       limit = NULL
-    )
-    ustns=unique(data.frame(id=stns$id,distance=stns$distance)[c("id", "distance")])
-    
+  )
+  ustns=unique(data.frame(id=stns$id,distance=stns$distance)[c("id", "distance")])
+  
     WXStn=ustns[order(ustns$distance),]$id[1]
     WXDistance=ustns[order(ustns$distance),]$distance[1]
-    WXDataplot=meteo_pull_monitors(
+    modeldata=meteo_pull_monitors(
       monitors=WXStn,
       keep_flags = FALSE,
       date_min = date_min,
       date_max = date_max,
       var = c("TMAX","TMIN","PRCP")
     )
+    if(!("prcp" %in% colnames(modeldata))){
+      modeldata$prcp=NA
+    }
+    if(!("tmax" %in% colnames(modeldata))){
+      modeldata$tmax=NA
+    } 
+    if(!("tmin" %in% colnames(modeldata))){
+      modeldata$tmin=NA
+    }
+    modeldata$tmaxid=WXStn
+    modeldata$tminid=WXStn
+    modeldata$prcpid=WXStn
+    modeldata$tmaxDis=WXDistance
+    modeldata$tminDis=WXDistance
+    modeldata$prcpDis=WXDistance
+
+  
+  if (method == "IDW"){
     
-    WXDataplot$tmaxid=WXStn
-    WXDataplot$tminid=WXStn
-    WXDataplot$prcpid=WXStn
-    WXDataplot$tmaxDis=WXDistance
-    WXDataplot$tminDis=WXDistance
-    WXDataplot$prcpDis=WXDistance
+    WXDataplot=modeldata
     ################prcp_plot
     prcp_plot=ggplot(WXDataplot, aes(x=date,y=prcpDis, col=prcpid))+
       geom_point(size=0.5)+
@@ -75,30 +86,6 @@ FillMissWX=function(declat, declon,StnRadius,date_min,date_max,method,alfa=2){
     plot(tmin_plot)
     plot(prcp_plot)
     #################################################
-    stns=meteo_distance(
-      station_data=ghcnd_stations(),
-      lat=declat,
-      long=declon,
-      units = "deg",
-      radius = StnRadius,
-      limit = NULL
-    )
-    ustns=unique(data.frame(id=stns$id,distance=stns$distance)[c("id", "distance")])
-    WXStn=ustns[order(ustns$distance),]$id[1]
-    WXDistance=ustns[order(ustns$distance),]$distance[1]
-    modeldata=meteo_pull_monitors(
-      monitors=WXStn,
-      keep_flags = FALSE,
-      date_min = date_min,
-      date_max = date_max,
-      var = c("TMAX","TMIN","PRCP")
-    )
-    modeldata$tmaxid=WXStn
-    modeldata$tminid=WXStn
-    modeldata$prcpid=WXStn
-    modeldata$tmaxDis=WXDistance
-    modeldata$tminDis=WXDistance
-    modeldata$prcpDis=WXDistance
     if("prcp" %in% colnames(modeldata)){
       modeldata$prcp=modeldata$prcp*(1/(WXDistance^alfa))
     } else {
@@ -194,46 +181,6 @@ FillMissWX=function(declat, declon,StnRadius,date_min,date_max,method,alfa=2){
     return(modeldata)
   }
   if(method == "closest"){
-    stns=meteo_distance(
-      station_data=ghcnd_stations(),
-      lat=declat,
-      long=declon,
-      units = "deg",
-      radius = StnRadius,
-      limit = NULL
-    )
-    ustns=unique(data.frame(id=stns$id,distance=stns$distance)[c("id", "distance")])
-    WXStn=ustns[order(ustns$distance),]$id[1]
-    WXDistance=ustns[order(ustns$distance),]$distance[1]
-    modeldata=meteo_pull_monitors(
-      monitors=WXStn,
-      keep_flags = FALSE,
-      date_min = date_min,
-      date_max = date_max,
-      var = c("TMAX","TMIN","PRCP")
-    )
-    if("prcp" %in% colnames(modeldata)){
-      modeldata$prcp=modeldata$prcp
-    } else {
-      modeldata$prcp=NA
-    }
-    if("tmax" %in% colnames(modeldata)){
-      modeldata$tmax=modeldata$tmax
-    } else {
-      modeldata$tmax=NA
-    }
-    
-    if("tmin" %in% colnames(modeldata)){
-      modeldata$tmin=modeldata$tmin
-    } else{
-      modeldata$tmin=NA
-    }
-    modeldata$tmaxid=WXStn
-    modeldata$tminid=WXStn
-    modeldata$prcpid=WXStn
-    modeldata$tmaxDis=WXDistance
-    modeldata$tminDis=WXDistance
-    modeldata$prcpDis=WXDistance
     for (i in 2:length(ustns[,1])){
       WXStn=ustns[order(ustns$distance),]$id[i]
       WXDistance=ustns[order(ustns$distance),]$distance[i]
