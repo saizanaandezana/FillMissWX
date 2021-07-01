@@ -10,7 +10,7 @@ A function to fill missing weather data with closest GHCN data based on inverse 
   distance weighting (method="IDW") or closeset GHCN weather data (method="closest").
 }
 \usage{
-FillMissWX(declat, declon, StnRadius, date_min, date_max,method)
+FillMissWX(declat, declon, StnRadius, date_min, date_max, method, alfa)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,6 +31,9 @@ A character string giving the latest date of the daily weather time series that 
 }
    \item{method}{
 A vector of character strings representing the method that has been used to fill weather data. The value should be any subset of the values c("IDW", "closest").
+}
+  \item{alfa}{
+The power in IDW equation, if method=“IDW”. The default value is 2.
 }
 }
 \details{
@@ -72,10 +75,10 @@ flowgage=get_usgs_gage(flowgage_id,begin_date = "2010-01-01",
                        end_date = "2022-01-01")
 LOCFerIDW=FillMissWX(declat=flowgage$declat, declon=flowgage$declon,
                    StnRadius=30,date_min="2010-01-01",date_max="2021-01-01",
-                    method = "IDW")
+                    method = "IDW",alfa)
 LOCFerClosest=FillMissWX(declat=flowgage$declat, declon=flowgage$declon,
                           StnRadius=30,date_min="2010-01-01",date_max="2021-01-01",
-                         method = "closest")
+                         method = "closest",alfa)
 View(LOCFerIDW)
 View(LOCFerClosest)
 
