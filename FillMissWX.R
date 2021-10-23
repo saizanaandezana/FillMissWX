@@ -1,4 +1,4 @@
-FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,method,alfa=2){
+FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,targElev,method,alfa=2){
   station_data=ghcnd_stations()
   while(StnRadius<2000){
     print(StnRadius)
@@ -25,7 +25,7 @@ FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,method,al
   )
   if(!("prcp" %in% colnames(modeldata))){
     modeldata$prcp=NA
-
+    
   }
   if(!("tmax" %in% colnames(modeldata))){
     modeldata$tmax=NA
@@ -46,11 +46,20 @@ FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,method,al
   #####Base plot(distance vs date) func for both IDW nd Closest#
   WXDataplot=modeldata
   
-  if (method == "IDW"){
+  if (method == "IDW" || method == "IDEW"){
     #################################################
+    if(method == "IDW"){
+      PrcpAdjFac=matrix(data = 0, nrow = 1, ncol = 12)
+      TempLapsRate=matrix(data = 0, nrow = 1, ncol = 12)
+    }
+    if(method == "IDEW") {
+      PrcpAdjFac=matrix(c(0.00035,0.00035,0.00035,0.00030,0.00025,0.00020,0.0002,0.0002,0.0002,0.00025,0.00030,0.00035))# m^-1
+      TempLapsRate=matrix(c(0.0044,0.0059,0.0071,0.0078,0.0081,0.0082,0.0081,0.0081,0.0077,0.0068,.00055,0.0047)) # C m^-1
+    }
     modeldata$DenPrcp=0;modeldata$DenTmin=0;modeldata$DenTmax=0
     if("prcp" %in% colnames(modeldata)){
-      modeldata$prcp=modeldata$prcp*(1/(modeldata$prcpDis^alfa))
+      
+      modeldata$prcp=modeldata$prcp*(1/(modeldata$prcpDis^alfa))*abs(((1+(PrcpAdjFac[month(modeldata$date)]*(targElev-WXElev)))/(1-(PrcpAdjFac[month(modeldata$date)]*(targElev-WXElev)))))
       modeldata$DenPrcp[!is.na(modeldata$prcp)]=(1/(modeldata$prcpDis^alfa))
       modeldata$prcpElev[is.na(modeldata$prcp)]=NA
       modeldata$prcpElev[!is.na(modeldata$prcp)]=WXElev*(1/(modeldata$prcpDis^alfa))
@@ -59,17 +68,17 @@ FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,method,al
       modeldata$prcp=NA
     }
     if("tmax" %in% colnames(modeldata)){
-      modeldata$tmax=modeldata$tmax*(1/(modeldata$tmaxDis^alfa))
+      modeldata$tmax=(modeldata$tmax-(TempLapsRate[month(modeldata$date)]*(targElev-WXElev)))*(1/(modeldata$tmaxDis^alfa))
       modeldata$DenTmax[!is.na(modeldata$tmax)]=(1/(modeldata$tmaxDis^alfa))
       modeldata$tmaxElev[is.na(modeldata$tmax)]=NA
       modeldata$tmaxElev[!is.na(modeldata$tmax)]=WXElev*(1/(modeldata$tmaxDis^alfa))
-
+      
     } else {
       modeldata$tmax=NA
     }
     
     if("tmin" %in% colnames(modeldata)){
-      modeldata$tmin=modeldata$tmin*(1/(modeldata$tminDis^alfa))
+      modeldata$tmin=(modeldata$tmin-(TempLapsRate[month(modeldata$date)]*(targElev-WXElev)))*(1/(modeldata$tminDis^alfa))
       modeldata$DenTmin[!is.na(modeldata$tmin)]=(1/(modeldata$tminDis^alfa))
       modeldata$tminElev[is.na(modeldata$tmin)]=NA
       modeldata$tminElev[!is.na(modeldata$tmin)]=WXElev*(1/(modeldata$tminDis^alfa))
@@ -98,9 +107,9 @@ FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,method,al
           modeldata$prcpElev[is.na(modeldata$prcp.x) & !is.na(modeldata$prcp.y)]=WXElev*(1/(WXDistance^alfa))
           
           modeldata$prcp.x[!is.na(modeldata$prcp.y) & !is.na(modeldata$prcp.x)]=modeldata$prcp.x[!is.na(modeldata$prcp.y) & !is.na(modeldata$prcp.x)]+
-            modeldata$prcp.y[!is.na(modeldata$prcp.y) & !is.na(modeldata$prcp.x)]*(1/(WXDistance^alfa))
-          modeldata$prcp.x[is.na(modeldata$prcp.x) & !is.na(modeldata$prcp.y)]=modeldata$prcp.y[is.na(modeldata$prcp.x) & !is.na(modeldata$prcp.y)]*(1/(WXDistance^alfa))
-              modeldata=subset(modeldata,select = -c(prcp.y))
+            modeldata$prcp.y[!is.na(modeldata$prcp.y) & !is.na(modeldata$prcp.x)]*(1/(WXDistance^alfa))*abs(((1+(PrcpAdjFac[month(modeldata$date)]*(targElev-WXElev)))/(1-(PrcpAdjFac[month(modeldata$date)]*(targElev-WXElev)))))
+          modeldata$prcp.x[is.na(modeldata$prcp.x) & !is.na(modeldata$prcp.y)]=modeldata$prcp.y[is.na(modeldata$prcp.x) & !is.na(modeldata$prcp.y)]*(1/(WXDistance^alfa))*abs(((1+(PrcpAdjFac[month(modeldata$date)]*(targElev-WXElev)))/(1-(PrcpAdjFac[month(modeldata$date)]*(targElev-WXElev)))))
+          modeldata=subset(modeldata,select = -c(prcp.y))
         }
         if("tmax.y" %in% colnames(modeldata)){
           modeldata$DenTmax[is.na(modeldata$DenTmax)]=0
@@ -109,11 +118,11 @@ FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,method,al
           modeldata$tmaxElev[!is.na(modeldata$tmax.y) & !is.na(modeldata$tmax.x)]=modeldata$tmaxElev[!is.na(modeldata$tmax.y) & !is.na(modeldata$tmax.x)]+WXElev*(1/(WXDistance^alfa))
           modeldata$tmaxElev[is.na(modeldata$tmax.x) & !is.na(modeldata$tmax.y)]=WXElev*(1/(WXDistance^alfa))         
           
-          modeldata$tmax.x[!is.na(modeldata$tmax.y) & !is.na(modeldata$tmax.x)]=modeldata$tmax.x[!is.na(modeldata$tmax.x) & !is.na(modeldata$tmax.y)]+
-            modeldata$tmax.y[!is.na(modeldata$tmax.y) & !is.na(modeldata$tmax.x)]*(1/(WXDistance^alfa))
-          modeldata$tmax.x[is.na(modeldata$tmax.x) & !is.na(modeldata$tmax.y)]=modeldata$tmax.y[is.na(modeldata$tmax.x) & !is.na(modeldata$tmax.y)]*(1/(WXDistance^alfa))
+          modeldata$tmax.x[!is.na(modeldata$tmax.y) & !is.na(modeldata$tmax.x)]=modeldata$tmax.x[!is.na(modeldata$tmax.x) & !is.na(modeldata$tmax.y)] +
+            (modeldata$tmax.y[!is.na(modeldata$tmax.y) & !is.na(modeldata$tmax.x)]-(TempLapsRate[month(modeldata$date)]*(targElev-WXElev)))*(1/(WXDistance^alfa))
+          modeldata$tmax.x[is.na(modeldata$tmax.x) & !is.na(modeldata$tmax.y)]=(modeldata$tmax.y[is.na(modeldata$tmax.x) & !is.na(modeldata$tmax.y)]-(TempLapsRate[month(modeldata$date)]*(targElev-WXElev)))*(1/(WXDistance^alfa))
           
- 
+          
           modeldata=subset(modeldata,select = -c(tmax.y))
         }
         if("tmin.y" %in% colnames(modeldata)){      
@@ -124,10 +133,10 @@ FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,method,al
           modeldata$tminElev[is.na(modeldata$tmin.x) & !is.na(modeldata$tmin.y)]=WXElev*(1/(WXDistance^alfa))             
           
           
-           modeldata$tmin.x[!is.na(modeldata$tmin.y) & !is.na(modeldata$tmin.x)]=modeldata$tmin.x[!is.na(modeldata$tmin.x) & !is.na(modeldata$tmin.y)]+
-            modeldata$tmin.y[!is.na(modeldata$tmin.y) & !is.na(modeldata$tmin.x)]*(1/(WXDistance^alfa))
-          modeldata$tmin.x[is.na(modeldata$tmin.x) & !is.na(modeldata$tmin.y)]=modeldata$tmin.y[is.na(modeldata$tmin.x) & !is.na(modeldata$tmin.y)]*(1/(WXDistance^alfa))
-
+          modeldata$tmin.x[!is.na(modeldata$tmin.y) & !is.na(modeldata$tmin.x)]=modeldata$tmin.x[!is.na(modeldata$tmin.x) & !is.na(modeldata$tmin.y)]+
+            (modeldata$tmin.y[!is.na(modeldata$tmin.y) & !is.na(modeldata$tmin.x)]-(TempLapsRate[month(modeldata$date)]*(targElev-WXElev)))*(1/(WXDistance^alfa))
+          modeldata$tmin.x[is.na(modeldata$tmin.x) & !is.na(modeldata$tmin.y)]=(modeldata$tmin.y[is.na(modeldata$tmin.x) & !is.na(modeldata$tmin.y)]-(TempLapsRate[month(modeldata$date)]*(targElev-WXElev)))*(1/(WXDistance^alfa))
+          
           modeldata=subset(modeldata,select = -c(tmin.y))
         }
         
@@ -156,7 +165,7 @@ FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,method,al
       xlim(as.Date(c(date_min,date_max)))+
       ylim(0,StnRadius)+
       labs(title = 'Precipitation', x = 'Date', y = 'Distance (km)')
-
+    
     
     ####################tmax plot
     tmax_plot=ggplot(WXDataplot, aes(x=date,y=tmaxDis, col=tmaxid))+
@@ -164,14 +173,14 @@ FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,method,al
       xlim(as.Date(c(date_min,date_max)))+
       ylim(0,StnRadius)+
       labs(title = 'Maximum Temperature', x = 'Date', y = 'Distance (km)')
- 
+    
     ####################################tmin plot
     tmin_plot=ggplot(WXDataplot, aes(x=date,y=tminDis, col=tminid))+
       geom_point(size=0.5)+
       xlim(as.Date(c(date_min,date_max)))+
       ylim(0,StnRadius)+
       labs(title = 'Minimum Temperature', x = 'Date', y = 'Distance (km)') 
-
+    
     
     prcp_plotweight1=ggplot(data = WXDataplot1 ,aes(x=date,y=weightedP, col=prcpid.y))+
       geom_point(size=0.5)+
@@ -214,7 +223,7 @@ FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,method,al
         
         prcp_plotFinal=prcp_plot+geom_point(aes(x=date,y=prcpDis, col=prcpid),data=WXDataplot,size=0.5)
         prcp_plot=prcp_plotFinal
- 
+        
         WXDataplot1$weightedP=(1/WXDataplot1$prcpDis.y^alfa)/WXDataplot1$DenPrcp 
         
         prcp_plotweight=prcp_plotweight1+geom_point(data = WXDataplot1 ,aes(x=date,y=weightedP, col=prcpid.y),size=0.5)
@@ -311,7 +320,7 @@ FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,method,al
       expand_limits(y=0)+
       labs(title = 'Precipitation', x = 'Date', y = 'Distance of station from the outlet (km)')
     plot(plot_prcp)
-  
+    
     prcp_distance=ggplot(modeldata, aes(date,P, col=prcpid))+
       geom_point()+
       labs(title = 'Precipitation', x = 'Date', y = 'Precipitation (mm)')
@@ -322,7 +331,7 @@ FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,method,al
       expand_limits(y=0)+
       labs(title = 'Maximum Temperature', x = 'Date', y = 'Distance of station from the outlet (km)')
     plot(plot_tmax)
-
+    
     tmax_distance=ggplot(modeldata, aes(date,MaxTemp, col=tmaxid))+
       geom_point()+
       labs(title = 'Maximum Temperature', x = 'Date', y = 'Maximum Temperature (C)')
@@ -333,7 +342,7 @@ FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,method,al
       expand_limits(y=0)+
       labs(title = 'Minimum Temperature', x = 'Date', y = 'Distance of station from the outlet (km)')
     plot(plot_tmin)
- 
+    
     
     
     tmin_distance= ggplot(modeldata, aes(date,MinTemp, col=tminid))+
