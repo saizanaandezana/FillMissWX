@@ -1,4 +1,4 @@
-FillMissWX=function(declat, declon,StnRadius,minstns,date_min,date_max,targElev,method,alfa=2){
+FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min=Sys.Date()-365*10,date_max=Sys.Date(),targElev=0,method="IDW",alfa=2){
   station_data=ghcnd_stations()
   while(StnRadius<2000){
     print(StnRadius)
