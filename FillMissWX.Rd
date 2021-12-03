@@ -6,11 +6,11 @@ A function to fill missing weather data.
 }
 \description{
 A function to fill missing weather data with closest GHCN data based on inverse distance weighting method. This function generates a dataframe which contains filled weather data 
-  including Precipitation (P (mm)), Maximum temperature (MaxTemp (c)), Minimum temperature (MinTemp (c)). Two diffrent filling methods can be selected by user which are inverse
-  distance weighting (method="IDW") or closeset GHCN weather data (method="closest").
+  including Precipitation (P (mm)), Maximum temperature (MaxTemp (c)), Minimum temperature (MinTemp (c)). Three diffrent filling methods can be selected by user which are inverse
+  distance weighting (method="IDW"), inverse distance and elevation weighting (method="IDEW"), and closeset GHCN weather data (method="closest").
 }
 \usage{
-FillMissWX(declat, declon, StnRadius, date_min, date_max, method, alfa)
+FillMissWX(declat, declon, StnRadius, minstns, date_min, date_max, targElev, method, alfa)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,14 +23,20 @@ Longitude of the location. Western longitudes should be given as negative values
   \item{StnRadius}{
 A numeric vector giving the radius (in kilometers) within which to search for monitors near a location.
 }
+   \item{minstns}{
+A numeric vector giving the minimum number of monitors.
+}
   \item{date_min}{
 A character string giving the earliest date of the daily weather time series that the user would like in the final output. This character string should be formatted as "yyyy-mm-dd". If not specified, the default is to keep all daily data for the queried weather site from the earliest available date.
 }
   \item{date_max}{
 A character string giving the latest date of the daily weather time series that the user would like in the final output. This character string should be formatted as "yyyy-mm-dd". If not specified, the default is to keep all daily data for the queried weather site through the most current available date.
 }
+   \item{targElev}{
+A numeric vector giving the elevation of target location in IDEW method.
+}
    \item{method}{
-A vector of character strings representing the method that has been used to fill weather data. The value should be any subset of the values c("IDW", "closest").
+A vector of character strings representing the method that has been used to fill weather data. The value should be any subset of the values c("IDW", "closest", "IDEW").
 }
   \item{alfa}{
 The power in IDW equation, if method=“IDW”. The default value is 2.
@@ -74,12 +80,19 @@ flowgage_id="04282650"
 flowgage=get_usgs_gage(flowgage_id,begin_date = "2010-01-01",
                        end_date = "2022-01-01")
 LOCFerIDW=FillMissWX(declat=flowgage$declat, declon=flowgage$declon,
-                   StnRadius=30,date_min="2010-01-01",date_max="2021-01-01",
+                          StnRadius=30,minstns=10,date_min="2010-01-01",
+                          date_max="2021-01-01",targElev=1,
                     method = "IDW",alfa)
+LOCFerIDEW=FillMissWX(declat=flowgage$declat, declon=flowgage$declon,
+                          StnRadius=30,minstns=10,date_min="2010-01-01",
+                          date_max="2021-01-01",targElev=1,
+                    method = "IDEW",alfa)
 LOCFerClosest=FillMissWX(declat=flowgage$declat, declon=flowgage$declon,
-                          StnRadius=30,date_min="2010-01-01",date_max="2021-01-01",
+                          StnRadius=30,minstns=10,date_min="2010-01-01",
+                          date_max="2021-01-01",targElev=1,
                          method = "closest",alfa)
 View(LOCFerIDW)
+View(LOCFerIDEW)
 View(LOCFerClosest)
 
 }
