@@ -1,4 +1,4 @@
-FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,targElev=1,method="IDW",alfa=2){
+FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,targElev=1,method="IDW",alfa=2,printinto="png"){
   print(paste(date_min,date_max,StnRadius,targElev))
   station_data=ghcnd_stations()
   while(StnRadius<2000){
@@ -29,20 +29,20 @@ FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,tar
       ustns$source[k]="COOP" 
     }
     if (ustns$idNum[k]=="E"){
-      ustns$source[k]="ECA&D non-blended dataset" 
+      ustns$source[k]="ECA&D" 
     }
     if (ustns$idNum[k]=="M"){
-      ustns$source[k]="World Meteorological Organization ID" 
+      ustns$source[k]="WMOID" 
     }
     if (ustns$idNum[k]=="N"){
-      ustns$source[k]="National Meteorological/Hydrological Center" 
+      ustns$source[k]="NM/HC" 
     }  
     
     if (ustns$idNum[k]=="R"){
       ustns$source[k]="RAWS" 
     }  
     if (ustns$idNum[k]=="S"){
-      ustns$source[k]="USNRCS-SNOTEL" 
+      ustns$source[k]="SNOTEL" 
     }
     if (ustns$idNum[k]=="W"){
       ustns$source[k]="WBAN" 
@@ -200,12 +200,12 @@ FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,tar
     WXDataplot1$weightedTMN=(1/WXDataplot1$tminDis.y^alfa)/WXDataplot1$DenTmin
     
     #WXDataplot1$weightedTMX=((1/WXDataplot1$tmaxDis.y^alfa))/WXDataplot1$DenTmax
-    
     prcp_plot=ggplot(WXDataplot, aes(x=date,y=prcpDis, col=PrcSource))+
       geom_point(size=0.5)+
       xlim(as.Date(c(date_min,date_max)))+
       ylim(0,StnRadius)+
-      labs(title = 'Precipitation', x = 'Date', y = 'Distance (km)')
+      labs(title = 'Precipitation', x = 'Date', y = 'Distance (km)')+
+      theme(legend.title = element_blank())
     
     
     ####################tmax plot
@@ -213,31 +213,36 @@ FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,tar
       geom_point(size=0.5)+
       xlim(as.Date(c(date_min,date_max)))+
       ylim(0,StnRadius)+
-      labs(title = 'Maximum Temperature', x = 'Date', y = 'Distance (km)')
+      labs(title = 'Maximum Temperature', x = 'Date', y = 'Distance (km)')+
+      theme(legend.title = element_blank())
     
     ####################################tmin plot
     tmin_plot=ggplot(WXDataplot, aes(x=date,y=tminDis, col=tminSource))+
       geom_point(size=0.5)+
       xlim(as.Date(c(date_min,date_max)))+
       ylim(0,StnRadius)+
-      labs(title = 'Minimum Temperature', x = 'Date', y = 'Distance (km)') 
+      labs(title = 'Minimum Temperature', x = 'Date', y = 'Distance (km)')+
+      theme(legend.title = element_blank())
     
     
     prcp_plotweight1=ggplot(data = WXDataplot1 ,aes(x=date,y=weightedP, col=PrcSource.y))+
       geom_point(size=0.5)+
       xlim(as.Date(c(date_min,date_max)))+
-      labs(title = 'Precipitation', x = 'Date', y = 'Weight of the station')
+      labs(title = 'Precipitation', x = 'Date', y = 'Weight of the station')+
+      theme(legend.title = element_blank())
     ####################tmax plot
     tmax_plotweight1=ggplot(WXDataplot1, aes(x=date,y=weightedTMX, col=tmaxSource.y))+
       geom_point(size=0.5)+
       xlim(as.Date(c(date_min,date_max)))+
-      labs(title = 'Maximum Temperature', x = 'Date', y = 'Weight of the station')
+      labs(title = 'Maximum Temperature', x = 'Date', y = 'Weight of the station')+
+      theme(legend.title = element_blank())
     ####################################tmin plot
     
     tmin_plotweight1=ggplot(WXDataplot1, aes(x=date,y=weightedTMN, col=tminSource.y))+
       geom_point(size=0.5)+
       xlim(as.Date(c(date_min,date_max)))+
-      labs(title = 'Minimum Temperature', x = 'Date', y = 'Weight of the station')
+      labs(title = 'Minimum Temperature', x = 'Date', y = 'Weight of the station')+
+      theme(legend.title = element_blank())
     
     for (i in 2:length(ustns[,1])){
       WXStn=ustns[order(ustns$distance),]$id[i]
@@ -294,13 +299,37 @@ FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,tar
         tmin_plotweight1=tmin_plotweight
       }  
     }
-    
-    plot(prcp_plotweight1)
-    plot(prcp_plot)
-    plot(tmax_plotweight1)
-    plot(tmax_plot)
-    plot(tmin_plotweight1)
-    plot(tmin_plot)
+    setwd(getwd())
+    if(printinto=="png"){
+      png("prcpweight.png")
+      print(prcp_plotweight1)
+      dev.off()
+      png("prcp.png")
+      print(prcp_plot)
+      dev.off()
+      png("tmaxweight.png")
+      print(tmax_plotweight1)
+      dev.off()
+      png("tmax.png")
+      print(tmax_plot)
+      dev.off()
+      png("tminweight.png")
+      print(tmin_plotweight1)
+      dev.off()
+      png("tmin.png")
+      print(tmin_plot)
+      dev.off()
+    }
+    if(printinto=="pdf"){
+    pdf("IDWplots.pdf")
+    print(prcp_plotweight1)
+    print(prcp_plot)
+    print(tmax_plotweight1)
+    print(tmax_plot)
+    print(tmin_plotweight1)
+    print(tmin_plot)
+    dev.off()
+    }
     return(modeldata)
     
   }
@@ -370,37 +399,64 @@ FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,tar
     plot_prcp=ggplot(modeldata, aes(date,prcpDis, col=PrcSource))+
       geom_point()+
       expand_limits(y=0)+
-      labs(title = 'Precipitation', x = 'Date', y = 'Distance of station from the outlet (km)')
-    plot(plot_prcp)
-    
+      labs(title = 'Precipitation', x = 'Date', y = 'Distance of station from the outlet (km)')+
+      theme(legend.title = element_blank())
     prcp_distance=ggplot(modeldata, aes(date,P, col=PrcSource))+
       geom_point()+
-      labs(title = 'Precipitation', x = 'Date', y = 'Precipitation (mm)')
-    plot(prcp_distance)
+      labs(title = 'Precipitation', x = 'Date', y = 'Precipitation (mm)')+
+      theme(legend.title = element_blank())
     ##############Tmax
     plot_tmax= ggplot(modeldata, aes(date,tmaxDis, col=tmaxSource))+
       geom_point()+
       expand_limits(y=0)+
-      labs(title = 'Maximum Temperature', x = 'Date', y = 'Distance of station from the outlet (km)')
-    plot(plot_tmax)
-    
+      labs(title = 'Maximum Temperature', x = 'Date', y = 'Distance of station from the outlet (km)')+
+      theme(legend.title = element_blank())
     tmax_distance=ggplot(modeldata, aes(date,MaxTemp, col=tmaxSource))+
       geom_point()+
-      labs(title = 'Maximum Temperature', x = 'Date', y = 'Maximum Temperature (C)')
-    plot(tmax_distance)
+      labs(title = 'Maximum Temperature', x = 'Date', y = 'Maximum Temperature (C)')+
+      theme(legend.title = element_blank())
     ######MinTemp
     plot_tmin=ggplot(modeldata, aes(date,tminDis, col=tminSource))+
       geom_point()+
       expand_limits(y=0)+
-      labs(title = 'Minimum Temperature', x = 'Date', y = 'Distance of station from the outlet (km)')
-    plot(plot_tmin)
-    
-    
-    
+      labs(title = 'Minimum Temperature', x = 'Date', y = 'Distance of station from the outlet (km)')+
+      theme(legend.title = element_blank())
     tmin_distance= ggplot(modeldata, aes(date,MinTemp, col=tminSource))+
       geom_point()+
-      labs(title = 'Minimum Temperature', x = 'Date', y = 'Minimum Temperature (C)')
-    plot(tmin_distance)
+      labs(title = 'Minimum Temperature', x = 'Date', y = 'Minimum Temperature (C)')+
+      theme(legend.title = element_blank())
+   ################### 
+    setwd(getwd())
+    if(printinto=="pdf"){
+    pdf("Closestplots.pdf")
+    print(plot_prcp)
+    print(prcp_distance)
+    print(plot_tmax)
+    print(tmax_distance)
+    print(plot_tmin)
+    print(tmin_distance)
+    dev.off()
+    }
+    if(printinto=="png"){
+      png("prcp.png")
+      print(plot_prcp)
+      dev.off()
+      png("prcp_distance.png")
+      print(prcp_distance)
+      dev.off()
+      png("tmax.png")
+      print(plot_tmax)
+      dev.off()
+      png("tmax_distance.png")
+      print(tmax_distance)
+      dev.off()
+      png("tmin.png")
+      print(plot_tmin)
+      dev.off()
+      png("tmin_distance.png")
+      print(tmin_distance)
+      dev.off()
+    }
     return(modeldata)
   }
 }
