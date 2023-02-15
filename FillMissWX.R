@@ -53,20 +53,12 @@ FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,tar
   WXDistance=ustns[order(ustns$distance),]$distance[1]
   WXElev=ustns$elevation[1]
   WXSource=ustns$source[1]
-  modeldata=meteo_pull_monitors(
-    monitors=WXStn,
-    keep_flags = FALSE,
-    date_min = date_min,
-    date_max = date_max,
-    var = c("TMAX","TMIN","PRCP")
-  )
+  modeldata=data.frame(date=as.Date("1900-01-01"),id="USR0000OMID",tmin=0,tmax=1,prcp=0)
   if(!("prcp" %in% colnames(modeldata))){
     modeldata$prcp=NA
-    
   }
   if(!("tmax" %in% colnames(modeldata))){
     modeldata$tmax=NA
-    
   } 
   if(!("tmin" %in% colnames(modeldata))){
     modeldata$tmin=NA
@@ -100,18 +92,18 @@ FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,tar
     if("prcp" %in% colnames(modeldata)){
       
       modeldata$prcp=modeldata$prcp*(1/(modeldata$prcpDis^alfa))*abs(((1+(PrcpAdjFac[month(modeldata$date)]*(targElev-WXElev)))/(1-(PrcpAdjFac[month(modeldata$date)]*(targElev-WXElev)))))
-      modeldata$DenPrcp[!is.na(modeldata$prcp)]=(1/(modeldata$prcpDis^alfa))
+      modeldata$DenPrcp[!is.na(modeldata$prcp)]=(1/(modeldata$prcpDis[!is.na(modeldata$prcp)]^alfa))
       modeldata$prcpElev[is.na(modeldata$prcp)]=NA
-      modeldata$prcpElev[!is.na(modeldata$prcp)]=WXElev*(1/(modeldata$prcpDis^alfa))
+      modeldata$prcpElev[!is.na(modeldata$prcp)]=WXElev*(1/(modeldata$prcpDis[!is.na(modeldata$prcp)]^alfa))
       
     } else {
       modeldata$prcp=NA
     }
     if("tmax" %in% colnames(modeldata)){
       modeldata$tmax=(modeldata$tmax-(TempLapsRate[month(modeldata$date)]*(targElev-WXElev)))*(1/(modeldata$tmaxDis^alfa))
-      modeldata$DenTmax[!is.na(modeldata$tmax)]=(1/(modeldata$tmaxDis^alfa))
+      modeldata$DenTmax[!is.na(modeldata$tmax)]=(1/(modeldata$tmaxDis[!is.na(modeldata$tmax)]^alfa))
       modeldata$tmaxElev[is.na(modeldata$tmax)]=NA
-      modeldata$tmaxElev[!is.na(modeldata$tmax)]=WXElev*(1/(modeldata$tmaxDis^alfa))
+      modeldata$tmaxElev[!is.na(modeldata$tmax)]=WXElev*(1/(modeldata$tmaxDis[!is.na(modeldata$tmax)]^alfa))
       
     } else {
       modeldata$tmax=NA
@@ -119,9 +111,9 @@ FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,tar
     
     if("tmin" %in% colnames(modeldata)){
       modeldata$tmin=(modeldata$tmin-(TempLapsRate[month(modeldata$date)]*(targElev-WXElev)))*(1/(modeldata$tminDis^alfa))
-      modeldata$DenTmin[!is.na(modeldata$tmin)]=(1/(modeldata$tminDis^alfa))
+      modeldata$DenTmin[!is.na(modeldata$tmin)]=(1/(modeldata$tminDis[!is.na(modeldata$tmin)]^alfa))
       modeldata$tminElev[is.na(modeldata$tmin)]=NA
-      modeldata$tminElev[!is.na(modeldata$tmin)]=WXElev*(1/(modeldata$tminDis^alfa))
+      modeldata$tminElev[!is.na(modeldata$tmin)]=WXElev*(1/(modeldata$tminDis[!is.na(modeldata$tmin)]^alfa))
     } else{
       modeldata$tmin=NA
     }
@@ -244,7 +236,7 @@ FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,tar
       labs(title = 'Minimum Temperature', x = 'Date', y = 'Weight of the station')+
       theme(legend.title = element_blank())
     
-    for (i in 2:length(ustns[,1])){
+    for (i in 1:length(ustns[,1])){
       WXStn=ustns[order(ustns$distance),]$id[i]
       WXDistance=ustns[order(ustns$distance),]$distance[i]
       WXElev=ustns$elevation[i]
@@ -256,7 +248,7 @@ FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,tar
         date_max = date_max,
         var = c("TMAX","TMIN","PRCP")
       )
-      
+      if(length(WXDataplot)<3 || length(WXDataplot$id)<30){next()} 
       WXDataplot$prcpid=WXStn
       WXDataplot$prcpDis=WXDistance
       WXDataplot$tmaxid=WXStn
