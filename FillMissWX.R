@@ -118,7 +118,7 @@ FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,tar
       modeldata$tmin=NA
     }
     ################################################
-    for (i in 2:length(ustns[,1])){
+    for (i in 1:length(ustns[,1])){
       WXStn=ustns[order(ustns$distance),]$id[i]
       WXDistance=ustns[order(ustns$distance),]$distance[i]
       WXElev=ustns$elevation[i]
@@ -331,7 +331,7 @@ FillMissWX=function(declat, declon,StnRadius=30,minstns=10,date_min,date_max,tar
   
   #################################################################################
   if(method == "closest"){
-    for (i in 2:length(ustns[,1])){
+    for (i in 1:length(ustns[,1])){
       WXStn=ustns[order(ustns$distance),]$id[i]
       WXDistance=ustns[order(ustns$distance),]$distance[i]
       WXElev=ustns$elevation[i]
