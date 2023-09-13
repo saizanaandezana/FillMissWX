@@ -48,4 +48,4 @@ The **outputs** of the FillMissWX function include a data frame containing fille
 
          flowgage_id="04282650" 
          flowgage=get_usgs_gage(flowgage_id,begin_date = "2010-01-01",end_date = "2022-01-01")
-         LOCFer=FillMissWX(declat=flowgage$declat, declon=flowgage$declon,StnRadius=30,date_min="2010-01-01",date_max="2021-01-01")
+         WXData=FillMissWX(declat = flowgage$declat,declon = flowgage$declon,StnRadius = 30,date_min="2010-01-01",date_max="2022-01-01",method = "IDW",minstns =10)
