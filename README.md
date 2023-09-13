@@ -35,16 +35,11 @@ The **outputs** of the FillMissWX function include a data frame containing fille
 ### R packages that need to be installed:
 •   rnoaa
 •   EcoHydRology
-•   SWATmodel
-•   nhdplusTools
-•   sf
-•   dplyr
 •   ggplot2
 •   moments
 •   tidyverse
 •   viridis
-•   egg
 
         if (!require("pacman")) install.packages("pacman")
-        pacman::p_load(rnoaa,EcoHydRology,SWATmodel,nhdplusTools,sf,dplyr,ggplot2,moments,tidyverse,viridis,egg)
+        pacman::p_load(rnoaa,EcoHydRology,SWATmodel,ggplot2,moments,tidyverse,viridis)
 
