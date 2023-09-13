@@ -30,3 +30,21 @@ FillMissWX tool is a new modeling interface that has been developed and added to
 The required **inputs** to run the FillMissWX function are latitude **(declat)** and longitude **(declon)** of the location of interest, the radius within which to search for monitors from the target location in kilometers **(StnRadius)**, the minimum number of monitors from which data need to be downloaded **(minstns)**, the earliest **(date_min)** and latest **(date_max)** date of interest, the elevation of the target location (km) in IDEW method **(targElev)**, the method to use to fill missing weather data including **“closest”**, **“IDW”**, and **“IDEW”**  (method), the weighting power in IDW and IDEW methods with the default value of 2 **(alfa, 1-6)**, and the print format “png” or “pdf” format **(printinto)**. 
 The **outputs** of the FillMissWX function include a data frame containing filled precipitation **(P)** (mm), maximum temperature **(MaxTemp)** and minimum temperature **(MinTemp)** (°C), the weighted-average elevation of monitors used for precipitation **(prcpElev)**, maximum temperature **(tmaxElev)**, and minimum temperature **(tminElev)**.
 
+## Quick start
+
+### R packages that need to be installed:
+•   rnoaa
+•   EcoHydRology
+•   SWATmodel
+•   nhdplusTools
+•   sf
+•   dplyr
+•   ggplot2
+•   moments
+•   tidyverse
+•   viridis
+•   egg
+
+        if (!require("pacman")) install.packages("pacman")
+        pacman::p_load(rnoaa,EcoHydRology,SWATmodel,nhdplusTools,sf,dplyr,ggplot2,moments,tidyverse,viridis,egg)
+
