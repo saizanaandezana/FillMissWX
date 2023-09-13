@@ -1,4 +1,4 @@
-# FillMissWX Modeling Interface
+# FillMissWX Modeling Interface [![DOI](https://sandbox.zenodo.org/badge/371678125.svg)](https://sandbox.zenodo.org/badge/latestdoi/371678125)
 
 To reliably estimate missing weather data we developed FillMissWX, a tool in the EcoHydRology R package (Fuka et al., 2014), to automatically download daily weather data of Global Historical Climatology Network (GHCN) monitors and fill and interpolate missing data
 
