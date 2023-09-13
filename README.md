@@ -2,6 +2,22 @@
 
 To reliably estimate missing weather data we developed FillMissWX, a tool in the EcoHydRology R package (Fuka et al., 2014), to automatically download daily weather data of Global Historical Climatology Network (GHCN) monitors and fill and interpolate missing data
 
+## Links
+See the following links for more information on  `R` and `RStudio` download and installation:
+
+- An introduction to `R`: <https://cran.r-project.org/doc/manuals/r-release/R-intro.pdf>
+- `R` download: <https://www.r-project.org/>
+- `RStudio` download: <https://www.rstudio.com/>
+
+There is also a cloud-based `RStudio` sever at the following location:
+
+- Cloud-based `RStudio` server: <https://rstudio.cloud/>
+
+See the following links for more information on `GHCN` data:
+
+- Global Historical Climatology Network daily (GHCNd): <https://www.ncei.noaa.gov/products/land-based-station/global-historical-climatology-network-daily>
+- Community Collaborative Rain, Hail, and Snow (CoCoRaHS): <https://www.cocorahs.org/>
+- Cooperative Observer Program (COOP):<https://www.weather.gov/coop/Overview>
 ## Description
 FillMissWX tool is a new modeling interface that has been developed and added to the  CRAN EcoHydRology package (Fuka et al., 2014). This tool enables users to : 
 
